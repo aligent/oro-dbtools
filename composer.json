@@ -1,0 +1,15 @@
+{
+    "name": "aligent/oro-dbtools",
+    "description": "Database tools bundle for Orocrm",
+    "require": {
+        "oro/platform": "2.1.*",
+        "php": ">=7.0"
+    },
+    "license": "OSL-3.0",
+    "authors": [
+        {
+            "name": "Adam Hall",
+            "email": "adam.hall@aligent.com.au"
+        }
+    ]
+}
