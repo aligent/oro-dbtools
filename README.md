@@ -30,7 +30,9 @@ Commands
 
         php app/console oro:db:console
         
-        php app/console oro:db:import
+        php app/console oro:db:import filename.sql
+        
+        php app/console oro:db:query SELECT * FROM database.table;
 
 
 Support
@@ -52,3 +54,7 @@ Licence
 Copyright
 ---------
 (c) 2017 Aligent Consulting
+
+Thanks
+---------
+[netz98](https://github.com/netz98) - For [n98magerun](https://github.com/netz98/n98-magerun) which this tool is based on.
