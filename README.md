@@ -37,7 +37,7 @@ Commands
 
 Support
 -------
-If you have any issues with this bundle, please create a [pull request]() with a failing test that demonstrates the problem you've found.  If you're really stuck, feel free to open [GitHub issue](https://github.com/aligent/orocrm-livechat-bundle/issues).
+If you have any issues with this bundle, please create a [pull request](https://github.com/aligent/oro-dbtools/pulls) with a failing test that demonstrates the problem you've found.  If you're really stuck, feel free to open [GitHub issue](https://github.com/aligent/oro-dbtools/issues).
 
 Contribution
 ------------
