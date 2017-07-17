@@ -33,6 +33,10 @@ Commands
         php app/console oro:db:import filename.sql
         
         php app/console oro:db:query SELECT * FROM database.table;
+        
+        php app/console oro:db:drop
+        
+        php app/console oro:db:create
 
 
 Support
