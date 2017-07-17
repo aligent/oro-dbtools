@@ -95,8 +95,14 @@ class DatabaseHelper
 
         $database = $this->settings->getName();
 
+        $dsn = sprintf(
+            'mysql:host=%s;port=%s',
+            $this->settings->getHost(),
+            $this->settings->getPort()
+        );
+
         $connection = new PDO(
-            $this->getPdoConnectionString(),
+            $dsn,
             $this->settings->getUser(),
             $this->settings->getPassword()
         );

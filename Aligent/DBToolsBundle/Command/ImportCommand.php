@@ -29,6 +29,7 @@ class ImportCommand extends AbstractCommand
             ->addArgument('filename', InputArgument::REQUIRED, 'Dump filename')
             ->addOption('compression', 'c', InputOption::VALUE_REQUIRED, 'The compression of the specified file')
             ->addOption("only-command", null, InputOption::VALUE_NONE, "Prints the command. Does not execute.")
+            ->addOption('only-if-empty', null, InputOption::VALUE_NONE, 'Imports only if database is empty')
             ->addOption(
                 'optimize',
                 null,
