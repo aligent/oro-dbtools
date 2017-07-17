@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: adam.hall
- * Date: 7/13/17
- * Time: 10:39 AM
- */
-
 namespace Aligent\DBToolsBundle\Command;
 
 use Aligent\DBToolsBundle\Helper\Compressor\Compressor;
@@ -14,6 +7,17 @@ use InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+
+/**
+ * Abstract Command Class - All Commands are children of this.
+ *
+ * @category  Aligent
+ * @package   DBToolsBundle
+ * @author    Adam Hall <adam.hall@aligent.com.au>
+ * @copyright 2017 Aligent Consulting.
+ * @license   https://opensource.org/licenses/mit MIT License
+ * @link      http://www.aligent.com.au/
+ **/
 
 abstract class AbstractCommand extends ContainerAwareCommand
 {

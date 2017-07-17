@@ -8,8 +8,15 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 /**
  * This is the class that validates and merges configuration from your app/config files.
  *
+ * @category  Aligent
+ * @package   DBToolsBundle
+ * @author    Adam Hall <adam.hall@aligent.com.au>
+ * @copyright 2017 Aligent Consulting.
+ * @license   https://opensource.org/licenses/mit MIT License
+ * @link      http://www.aligent.com.au/
  * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/configuration.html}
- */
+ **/
+
 class Configuration implements ConfigurationInterface
 {
     /**

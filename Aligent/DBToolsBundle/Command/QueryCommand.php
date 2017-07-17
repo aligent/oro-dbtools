@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: adam.hall
- * Date: 7/17/17
- * Time: 9:58 AM
- */
-
 namespace Aligent\DBToolsBundle\Command;
 
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -14,6 +7,17 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
+
+/**
+ * Query Command - Runs a query on the mysql database that Oro is using.
+ *
+ * @category  Aligent
+ * @package   DBToolsBundle
+ * @author    Adam Hall <adam.hall@aligent.com.au>
+ * @copyright 2017 Aligent Consulting.
+ * @license   https://opensource.org/licenses/mit MIT License
+ * @link      http://www.aligent.com.au/
+ **/
 
 class QueryCommand extends AbstractCommand
 {

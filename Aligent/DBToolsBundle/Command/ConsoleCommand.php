@@ -1,17 +1,19 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: adam.hall
- * Date: 7/13/17
- * Time: 9:29 AM
- */
-
 namespace Aligent\DBToolsBundle\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
+/**
+ * Console Command - Opens a mysql console
+ *
+ * @category  Aligent
+ * @package   DBToolsBundle
+ * @author    Adam Hall <adam.hall@aligent.com.au>
+ * @copyright 2017 Aligent Consulting.
+ * @license   https://opensource.org/licenses/mit MIT License
+ * @link      http://www.aligent.com.au/
+ **/
 class ConsoleCommand extends AbstractCommand
 {
     const COMMAND_NAME = 'oro:db:console';

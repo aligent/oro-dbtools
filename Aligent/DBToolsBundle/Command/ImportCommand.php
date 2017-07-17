@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: adam.hall
- * Date: 7/14/17
- * Time: 3:25 PM
- */
-
 namespace Aligent\DBToolsBundle\Command;
 
 use InvalidArgumentException;
@@ -13,7 +6,16 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
+/**
+ * Import Command - Imports the database from a file
+ *
+ * @category  Aligent
+ * @package   DBToolsBundle
+ * @author    Adam Hall <adam.hall@aligent.com.au>
+ * @copyright 2017 Aligent Consulting.
+ * @license   https://opensource.org/licenses/mit MIT License
+ * @link      http://www.aligent.com.au/
+ **/
 class ImportCommand extends AbstractCommand
 {
 

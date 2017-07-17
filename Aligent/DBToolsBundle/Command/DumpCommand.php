@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: adam.hall
- * Date: 7/13/17
- * Time: 9:29 AM
- */
-
 namespace Aligent\DBToolsBundle\Command;
 
 use Aligent\DBToolsBundle\Helper\Compressor\Compressor;
@@ -20,6 +13,17 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\Yaml\Yaml;
+
+/**
+ * Dump Command - Dumps the database to a file
+ *
+ * @category  Aligent
+ * @package   DBToolsBundle
+ * @author    Adam Hall <adam.hall@aligent.com.au>
+ * @copyright 2017 Aligent Consulting.
+ * @license   https://opensource.org/licenses/mit MIT License
+ * @link      http://www.aligent.com.au/
+ **/
 
 class DumpCommand extends AbstractCommand
 {

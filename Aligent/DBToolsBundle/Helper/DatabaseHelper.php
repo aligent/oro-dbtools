@@ -1,17 +1,21 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: adam.hall
- * Date: 7/13/17
- * Time: 1:38 PM
- */
-
 namespace Aligent\DBToolsBundle\Helper;
 
 use InvalidArgumentException;
 use PDO;
 use PDOException;
 use RuntimeException;
+
+/**
+ * Databse Helper - Manages Simple PDO Connection and connection strings
+ *
+ * @category  Aligent
+ * @package   DBToolsBundle
+ * @author    Adam Hall <adam.hall@aligent.com.au>
+ * @copyright 2017 Aligent Consulting.
+ * @license   https://opensource.org/licenses/mit MIT License
+ * @link      http://www.aligent.com.au/
+ **/
 
 class DatabaseHelper
 {
