@@ -11,5 +11,10 @@
             "name": "Adam Hall",
             "email": "adam.hall@aligent.com.au"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-0": {
+            "Aligent\\DBToolsBundle": "."
+        }
+    }
 }
