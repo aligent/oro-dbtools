@@ -23,6 +23,8 @@ class DropCommand extends AbstractCommand
     const COMMAND_NAME = 'oro:db:drop';
     const COMMAND_DESCRIPTION=  'Drops the current Database';
 
+    private $dropped = 0;
+
     public function configure() {
         $this
             ->setName(self::COMMAND_NAME)
@@ -59,7 +61,7 @@ class DropCommand extends AbstractCommand
                 $db->query($query);
 
                 if ($input->getOption('tables')) {
-                    $output->writeln('<info>Dropped tables</info> <comment>' . count($this->database->getTables()) . ' tables dropped</comment>');
+                    $output->writeln('<info>Dropped tables</info> <comment>' . $this->dropped . ' tables dropped</comment>');
                 } else {
                     $output->writeln('<info>Dropped Database</info> <comment>' . $this->database->settings->getName() . '</comment>');
 
@@ -72,10 +74,10 @@ class DropCommand extends AbstractCommand
         $query = 'SET FOREIGN_KEY_CHECKS = 0; ';
         $tables = $this->database->getTables();
 
-        $count = 0;
+        $this->dropped = 0;
         foreach ($tables as $table) {
-            $query .= 'DROP TABLE IF EXISTS `' . $this->database->settings->getName() . '`;';
-            $count++;
+            $query .= 'DROP TABLE IF EXISTS ' . $this->database->settings->getName() . ".$table;";
+            $this->dropped++;
         }
 
         $query .= 'SET FOREIGN_KEY_CHECKS = 1; ';
