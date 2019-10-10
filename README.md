@@ -3,7 +3,7 @@ Aligent Database Tools Bundle for OroCRM
 
 Facts
 -----
-- version: 1.0.0
+- version: 2.0.0
 - composer name: aligent/oro-dbtools
 
 Description
@@ -57,7 +57,7 @@ Licence
 
 Copyright
 ---------
-(c) 2017 Aligent Consulting
+(c) 2017-19 Aligent Consulting
 
 Thanks
 ---------
