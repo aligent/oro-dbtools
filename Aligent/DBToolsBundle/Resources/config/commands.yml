@@ -1,0 +1,42 @@
+services:
+  Aligent\DBToolsBundle\Command\ConsoleCommand:
+    class: Aligent\DBToolsBundle\Command\ConsoleCommand
+    public: false
+    tags:
+      - { name: console.command }
+
+  Aligent\DBToolsBundle\Command\CreateCommand:
+    class: Aligent\DBToolsBundle\Command\CreateCommand
+    public: false
+    tags:
+      - { name: console.command }
+
+  Aligent\DBToolsBundle\Command\DropCommand:
+    class: Aligent\DBToolsBundle\Command\DropCommand
+    public: false
+    tags:
+      - { name: console.command }
+
+  Aligent\DBToolsBundle\Command\DumpCommand:
+    class: Aligent\DBToolsBundle\Command\DumpCommand
+    public: false
+    tags:
+      - { name: console.command }
+
+  Aligent\DBToolsBundle\Command\ImportCommand:
+    class: Aligent\DBToolsBundle\Command\ImportCommand
+    public: false
+    tags:
+      - { name: console.command }
+
+  Aligent\DBToolsBundle\Command\InfoCommand:
+    class: Aligent\DBToolsBundle\Command\InfoCommand
+    public: false
+    tags:
+      - { name: console.command }
+
+  Aligent\DBToolsBundle\Command\QueryCommand:
+    class: Aligent\DBToolsBundle\Command\QueryCommand
+    public: false
+    tags:
+      - { name: console.command }
