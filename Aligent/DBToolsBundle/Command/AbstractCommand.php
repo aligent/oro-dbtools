@@ -40,9 +40,9 @@ abstract class AbstractCommand extends ContainerAwareCommand
         }
     }
 
-    protected function initialize(InputInterface $input, OutputInterface $output)
+    public function setDatabaseHelper($database)
     {
-      $this->database = $this->getContainer()->get('aligent_db_tools.helper.database');
+      $this->database = $database;
     }
 
     /**

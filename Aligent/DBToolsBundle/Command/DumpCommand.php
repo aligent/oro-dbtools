@@ -68,7 +68,7 @@ class DumpCommand extends AbstractCommand
 
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        parent::initialize($input, $output); // Parent init first we need db deets
+        parent::initialize($input, $output);
         $this->loadTableDefinitions(); // Get table alias groupings from table_groups.yml
     }
 
