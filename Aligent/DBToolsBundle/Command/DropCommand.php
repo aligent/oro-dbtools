@@ -1,10 +1,13 @@
 <?php
 namespace Aligent\DBToolsBundle\Command;
 
+use Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
+use Symfony\Component\VarDumper\VarDumper;
 
 
 /**
@@ -18,13 +21,30 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
  * @link      http://www.aligent.com.au/
  **/
 
-class DropCommand extends AbstractCommand
+class DropCommand extends Command
 {
     const COMMAND_NAME = 'oro:db:drop';
     const COMMAND_DESCRIPTION=  'Drops the current Database';
+    
+    /**
+     * @var DatabaseConnectionProvider
+     */
+    protected $connectionProvider;
 
-    private $dropped = 0;
+    /**
+     * ConsoleCommand constructor.
+     * @param DatabaseConnectionProvider $connectionProvider
+     */
+    public function __construct(
+        DatabaseConnectionProvider $connectionProvider
+    ) {
+        $this->connectionProvider = $connectionProvider;
+        parent::__construct();
+    }
 
+    /**
+     * Configures the name, arguments and options of the command
+     */
     public function configure() {
         $this
             ->setName(self::COMMAND_NAME)
@@ -35,6 +55,11 @@ class DropCommand extends AbstractCommand
         ;
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|void
+     */
     public function execute(InputInterface $input, OutputInterface $output) {
 
         if ($input->getOption('force')) {
@@ -46,45 +71,28 @@ class DropCommand extends AbstractCommand
         }
 
         if ($shouldDrop) {
+            $connection = $this->connectionProvider->getConnection();
+
             if ($input->getOption('tables')) {
-                $query = $this->dropTables();
+                $query = $connection->getDropTablesQuery();
                 $output->writeln('<info>Dropping Tables</info>');
             } else {
-                $query = $this->dropDatabase();
-                $output->writeln('<info>Dropping database</info> <comment>' . $this->database->settings->getName() . '</comment>');
+                $query = $connection->getDropDatabaseQuery();
+                $output->writeln('<info>Dropping database</info> <comment>' . $connection->getName() . '</comment>');
             }
 
             if ($input->getOption('only-command')) {
                 $output->writeln($query);
             } else {
-                $db = $this->database->getConnection();
-                $db->query($query);
+                $pdo = $connection->getPDOConnection();
+                $return = $pdo->query($query);
 
                 if ($input->getOption('tables')) {
-                    $output->writeln('<info>Dropped tables</info> <comment>' . $this->dropped . ' tables dropped</comment>');
+                    $output->writeln('<info>Dropped tables</info>');
                 } else {
-                    $output->writeln('<info>Dropped Database</info> <comment>' . $this->database->settings->getName() . '</comment>');
-
+                    $output->writeln('<info>Dropped Database</info> <comment>' . $connection->getName() . '</comment>');
                 }
             }
         }
-    }
-
-    private function dropTables() {
-        $query = 'SET FOREIGN_KEY_CHECKS = 0; ';
-        $tables = $this->database->getTables();
-
-        $this->dropped = 0;
-        foreach ($tables as $table) {
-            $query .= 'DROP TABLE IF EXISTS ' . $this->database->settings->getName() . ".$table;";
-            $this->dropped++;
-        }
-
-        $query .= 'SET FOREIGN_KEY_CHECKS = 1; ';
-        return $query;
-    }
-
-    private function dropDatabase() {
-        return 'DROP DATABASE `' . $this->database->settings->getName() . '`;';
     }
 }
