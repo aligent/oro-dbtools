@@ -1,9 +1,10 @@
 {
     "name": "aligent/oro-dbtools",
-    "description": "Database tools bundle for Orocrm",
+    "description": "Database tools bundle for Oro Platform based projects.",
     "require": {
         "oro/platform": ">=2.1",
-        "php": ">=7.0"
+        "php": ">=7.2",
+        "ext-pdo": "*"
     },
     "license": "MIT",
     "authors": [
