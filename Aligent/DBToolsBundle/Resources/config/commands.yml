@@ -44,14 +44,16 @@ services:
 
   Aligent\DBToolsBundle\Command\InfoCommand:
     class: Aligent\DBToolsBundle\Command\InfoCommand
+    arguments:
       - '@Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider'
     public: false
     tags:
       - { name: console.command }
 
   Aligent\DBToolsBundle\Command\QueryCommand:
-    parent: Aligent\DBToolsBundle\Command\AbstractCommand
     class: Aligent\DBToolsBundle\Command\QueryCommand
+    arguments:
+      - '@Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider'
     public: false
     tags:
       - { name: console.command }
