@@ -1,4 +1,0 @@
-#shorcut_name:
-#  tables: table_name_1 @recursive_label
-#recursive_label:
-#  tables: table_name_2 table_name_3 table_name_4

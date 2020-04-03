@@ -2,6 +2,7 @@
 
 namespace Aligent\DBToolsBundle\DependencyInjection;
 
+use Oro\Bundle\ConfigBundle\DependencyInjection\SettingsBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -19,17 +20,51 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
+    const DEFINITIONS = 'definitions';
+
     /**
      * {@inheritdoc}
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('aligent_db_tools');
+        $treeBuilder = new TreeBuilder('aligent_db_tools');
+        $rootNode = $treeBuilder->getRootNode();
 
         // Here you should define the parameters that are allowed to
         // configure your bundle. See the documentation linked above for
         // more information on that topic.
+        $rootNode
+            ->children()
+                ->arrayNode(self::DEFINITIONS)
+                    ->useAttributeAsKey('name')
+                    ->arrayPrototype()
+                        ->children()
+                            ->arrayNode('truncate')
+                                ->children()
+                                    ->arrayNode('standard')
+                                        ->scalarPrototype()->end()
+                                    ->end()
+                                    ->arrayNode('cascade')
+                                        ->scalarPrototype()->end()
+                                    ->end()
+                                ->end()
+                            ->end()
+                            ->arrayNode('update')
+                                ->useAttributeAsKey('table')
+                                ->arrayPrototype()
+                                    ->arrayPrototype()
+                                        ->children()
+                                            ->scalarNode('column')->end()
+                                            ->scalarNode('function')->end()
+                                        ->end()
+                                    ->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end();
+
 
         return $treeBuilder;
     }

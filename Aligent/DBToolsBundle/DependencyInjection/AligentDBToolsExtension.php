@@ -26,6 +26,9 @@ class AligentDBToolsExtension extends Extension
     {
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
+        $container->prependExtensionConfig($this->getAlias(), $config);
+
+        $container->setParameter('aligent_db_tools.table_definitions', $config[Configuration::DEFINITIONS]);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');

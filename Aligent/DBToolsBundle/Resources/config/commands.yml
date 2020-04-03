@@ -1,9 +1,4 @@
 services:
-  Aligent\DBToolsBundle\Command\AbstractCommand:
-    class: Aligent\DBToolsBundle\Command\AbstractCommand
-    calls:
-      - [setDatabaseHelper, ['@aligent_db_tools.helper.database']]
-
   Aligent\DBToolsBundle\Command\ConsoleCommand:
     class: Aligent\DBToolsBundle\Command\ConsoleCommand
     public: false
@@ -29,8 +24,11 @@ services:
       - { name: console.command }
 
   Aligent\DBToolsBundle\Command\DumpCommand:
-    parent: Aligent\DBToolsBundle\Command\AbstractCommand
     class: Aligent\DBToolsBundle\Command\DumpCommand
+    arguments:
+      - '@Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider'
+      - '@Aligent\DBToolsBundle\Provider\CompressionServiceProvider'
+      - '%aligent_db_tools.definitions%'
     public: false
     tags:
       - { name: console.command }

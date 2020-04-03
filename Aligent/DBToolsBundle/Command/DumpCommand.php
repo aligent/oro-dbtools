@@ -1,10 +1,15 @@
 <?php
 namespace Aligent\DBToolsBundle\Command;
 
+use Aligent\DBToolsBundle\Database\DatabaseConnectionInterface;
+use Aligent\DBToolsBundle\Database\MysqlConnection;
 use Aligent\DBToolsBundle\Helper\Compressor\Compressor;
 use Aligent\DBToolsBundle\Helper\VerifyOrDie;
 
+use Aligent\DBToolsBundle\Provider\CompressionServiceProvider;
+use Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider;
 use InvalidArgumentException;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -12,6 +17,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
+use Symfony\Component\Process\Process;
+use Symfony\Component\VarDumper\VarDumper;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -25,13 +32,56 @@ use Symfony\Component\Yaml\Yaml;
  * @link      http://www.aligent.com.au/
  **/
 
-class DumpCommand extends AbstractCommand
+class DumpCommand extends Command
 {
     const COMMAND_NAME = 'oro:db:dump';
     const COMMAND_DESCRIPTION=  'Dumps the database';
 
-    protected $tableDefinitions;
+    /**
+     * @var array
+     */
+    protected $definitions;
 
+    /**
+     * @var DatabaseConnectionInterface
+     */
+    protected $connection;
+
+    /**
+     * @var Compressor
+     */
+    protected $compressor;
+
+    /**
+     * @var DatabaseConnectionProvider
+     */
+    protected $connectionProvider;
+
+    /**
+     * @var CompressionServiceProvider
+     */
+    protected $compressionProvider;
+
+    /**
+     * ConsoleCommand constructor.
+     * @param DatabaseConnectionProvider $connectionProvider
+     * @param CompressionServiceProvider $compressionProvider
+     * @param array $definitions
+     */
+    public function __construct(
+        DatabaseConnectionProvider $connectionProvider,
+        CompressionServiceProvider $compressionProvider,
+        array $definitions
+    ) {
+        $this->connectionProvider = $connectionProvider;
+        $this->compressionProvider = $compressionProvider;
+        $this->tableDefinitions = $definitions;
+        parent::__construct();
+    }
+
+    /**
+     * Configures the name, arguments and options of the command
+     */
     protected function configure()
     {
         $this->setName(self::COMMAND_NAME)
@@ -54,135 +104,73 @@ class DumpCommand extends AbstractCommand
                 null,
                 InputOption::VALUE_NONE,
                 'Print only mysqldump command. Do not execute'
-            )
-            ->addOption(
-                'strip',
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Tables to strip (dump only structure of those tables)'
-            )
-            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Do not prompt if all options are defined')
-            ->addOption('exclude', null, InputOption::VALUE_OPTIONAL, 'Tables to exclude from the dump')
-            ->addOption('include', null, InputOption::VALUE_OPTIONAL, 'Tables to include in the dump');
-    }
-
-    protected function initialize(InputInterface $input, OutputInterface $output)
-    {
-        parent::initialize($input, $output);
-        $this->loadTableDefinitions(); // Get table alias groupings from table_groups.yml
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $compressor = $this->getCompressor($input->getOption('compression'));
-        $fileName = $this->getFileName($input, $output, $compressor);
-
-        $canOutputInformation = !$input->getOption('only-command'); //add others back later
-
-        if ($canOutputInformation) {
-            $this->writeSection($output, 'Dump MySQL Database');
-        }
-
-        // strip tables (structure, no data)
-        $stripTables = array();
-        if ($input->getOption('strip')) {
-            $stripTables = $this->database->resolveTables(
-                explode(' ', $input->getOption('strip')),
-                $this->tableDefinitions
             );
-
-            if ($canOutputInformation) {
-                $output->writeln(
-                    sprintf('<comment>No-data export for: <info>%s</info></comment>', implode(' ', $stripTables))
-                );
-            }
-        }
-
-        if ($input->getOption('exclude') && $input->getOption('include')) {
-            throw new InvalidArgumentException('Cannot specify --include with --exclude');
-        }
-
-        $excludeTables = array();
-        if ($input->getOption('exclude')) {
-            $excludeTables = $this->database->resolveTables(
-                explode(' ', $input->getOption('exclude')),
-                $this->tableDefinitions
-            );
-            if ($canOutputInformation) {
-                $output->writeln(
-                    sprintf('<comment>Excluded: <info>%s</info></comment>', implode(' ', $excludeTables))
-                );
-            }
-        }
-
-        if ($input->getOption('include')) {
-            $includeTables = $this->database->resolveTables(
-                explode(' ', $input->getOption('include')),
-                $this->tableDefinitions
-            );
-            $excludeTables = array_diff($this->database->getTables(), $includeTables);
-            if ($canOutputInformation) {
-                $output->writeln(
-                    sprintf('<comment>Included: <info>%s</info></comment>', implode(' ', $includeTables))
-                );
-            }
-        }
-
-        $commands = array();
-
-        //Ignore the strips because we will be dumping just their structure later
-        $ignore = '';
-        foreach (array_merge($excludeTables, $stripTables) as $tableName) {
-            $ignore .= '--ignore-table=' . $this->database->settings->getName() . '.' . $tableName . ' ';
-        }
-
-        // dump structure for strip-tables
-        if (count($stripTables) > 0) {
-            $stripCommand = $this->database->getMysqlConnectionString('mysqldump', [
-                '--no-data'
-            ]);
-            $stripCommand .= ' ' . implode(' ', $stripTables);
-            $stripCommand .= $this->postDumpPipeCommands();
-            $stripCommand = $compressor->getCompressingCommand($stripCommand);
-            $stripCommand .= ' > ' . escapeshellarg($fileName);
-
-            $commands[] = $stripCommand;
-        }
-
-        //dump the rest
-        $dumpCommand = $this->database->getMysqlConnectionString('mysqldump') . ' ' . $ignore;
-        $dumpCommand .= $this->postDumpPipeCommands();
-        $dumpCommand = $compressor->getCompressingCommand($dumpCommand);
-        $dumpCommand .= (count($stripTables) > 0 ? ' >> ' : ' > ') . escapeshellarg($fileName);
-        $commands[] = $dumpCommand;
-
-        foreach ($commands as $command) {
-            if ($input->getOption('only-command')) {
-                $output->writeln($command);
-            } else {
-                $this->processCommand($command);
-            }
-        }
-    }
-
-    /**
-     * Commands which filter mysql data. Piped to mysqldump command
-     *
-     * @return string
-     */
-    protected function postDumpPipeCommands()
-    {
-        return ' | LANG=C LC_CTYPE=C LC_ALL=C sed -e ' . escapeshellarg('s/DEFINER[ ]*=[ ]*[^*]*\*/\*/');
     }
 
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @param Compressor $compressor
+     */
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
+        parent::initialize($input, $output);
+
+        if ($input->getOption('compression')) {
+            $this->compressor = $this->compressionProvider->getCompressor($input->getOption('compression'));
+        } else {
+            $this->compressor = $this->compressionProvider->getCompressor('none');
+        }
+
+        $this->connection = $this->connectionProvider->getConnection();
+    }
+
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|void
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $fileName = $this->getFileName($input, $output);
+        $canOutputInformation = !$input->getOption('only-command');
+
+
+        if ($canOutputInformation) {
+            $this->writeSection($output, 'Dumping Database');
+        }
+
+        $dumpCommand = $compressor->getCompressingCommand($this->connection->getDumpDatabaseCommand());
+        $dumpCommand .= ' > ' . escapeshellarg($fileName);
+
+        if ($input->getOption('only-command')) {
+            $output->writeln($dumpCommand);
+        } else {
+            $process = new Process(
+                $dumpCommand,
+                null,
+                null,
+                null,
+                null
+            );
+
+            try {
+                $process->mustRun();
+                $output->writeln($process->getOutput());
+            } catch (\Exception $e) {
+                $output->writeln($process->getErrorOutput());
+                $output->writeln($e->getMessage());
+            }
+        }
+    }
+    
+
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
      *
      * @return string
      */
-    protected function getFileName(InputInterface $input, OutputInterface $output, Compressor $compressor)
+    protected function getFileName(InputInterface $input, OutputInterface $output)
     {
         $namePrefix = '';
         $nameSuffix = '';
@@ -201,7 +189,7 @@ class DumpCommand extends AbstractCommand
         if (($fileName = $input->getArgument('filename')) === null || ($isDir = is_dir($fileName))) {
 
             $defaultName = VerifyOrDie::filename(
-                $namePrefix . $this->database->settings->getName() . $nameSuffix . $nameExtension
+                $namePrefix . $this->connection->getName() . $nameSuffix . $nameExtension
             );
             if (isset($isDir) && $isDir) {
                 $defaultName = rtrim($fileName, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $defaultName;
@@ -222,19 +210,23 @@ class DumpCommand extends AbstractCommand
             }
         }
 
-        $fileName = $compressor->getFileName($fileName);
+        $fileName = $this->compressor->getFileName($fileName);
 
         return $fileName;
     }
 
-    private function loadTableDefinitions() {
-        $filePath = $this->getContainer()->get('kernel')->locateResource('@AligentDBToolsBundle/Resources/config/table_groups.yml');
-
-        if (file_exists($filePath)) {
-            $tableDefinitions = Yaml::parse(file_get_contents($filePath));
-            $this->tableDefinitions = $tableDefinitions === null ? array() : $tableDefinitions;
-        } else {
-            throw new FileNotFoundException("table_groups.yml could not be found at " . $filePath);
-        }
+    /**
+     * Helper function to output section blocks
+     * @param OutputInterface $output
+     * @param string $text
+     * @param string $style
+     */
+    protected function writeSection(OutputInterface $output, $text, $style = 'bg=blue;fg=white')
+    {
+        $output->writeln(array(
+            '',
+            $this->getHelper('formatter')->formatBlock($text, $style, true),
+            '',
+        ));
     }
 }
