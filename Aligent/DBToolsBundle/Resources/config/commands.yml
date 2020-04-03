@@ -36,8 +36,10 @@ services:
       - { name: console.command }
 
   Aligent\DBToolsBundle\Command\ImportCommand:
-    parent: Aligent\DBToolsBundle\Command\AbstractCommand
     class: Aligent\DBToolsBundle\Command\ImportCommand
+    arguments:
+      - '@Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider'
+      - '@Aligent\DBToolsBundle\Provider\CompressionServiceProvider'
     public: false
     tags:
       - { name: console.command }

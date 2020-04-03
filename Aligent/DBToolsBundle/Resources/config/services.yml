@@ -1,18 +1,25 @@
-parameters:
-  aligent_db_tools.parameters.yml: '%kernel.root_dir%/../config/parameters.yml'
-
 services:
-  aligent_db_tools.helper.db_settings:
-    class: 'Aligent\DBToolsBundle\Helper\DBSettings'
+  Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider:
+    class: Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider
     arguments:
-        - '%aligent_db_tools.parameters.yml%'
-  aligent_db_tools.helper.database:
-    class: 'Aligent\DBToolsBundle\Helper\DatabaseHelper'
-    arguments:
-        - '@aligent_db_tools.helper.db_settings'
-  aligent_db_tools.helper.compressor.gzip:
+      - '%database_name%'
+      - '%database_user%'
+      - '%database_password%'
+      - '%database_host%'
+      - '%database_port%'
+      - '%database_driver%'
+
+  Aligent\DBToolsBundle\Provider\CompressionServiceProvider:
+    class: Aligent\DBToolsBundle\Provider\CompressionServiceProvider
+    calls:
+      - ['addCompressor', ['gz', '@Aligent\DBToolsBundle\Helper\Compressor\Gzip']]
+      - ['addCompressor', ['gzip', '@Aligent\DBToolsBundle\Helper\Compressor\Gzip']]
+      - ['addCompressor', ['none', '@Aligent\DBToolsBundle\Helper\Compressor\Uncompressed']]
+
+  Aligent\DBToolsBundle\Helper\Compressor\Gzip:
     class: 'Aligent\DBToolsBundle\Helper\Compressor\Gzip'
     public: true
-  aligent_db_tools.helper.compressor.uncompressed:
+
+  Aligent\DBToolsBundle\Helper\Compressor\Uncompressed:
     class: 'Aligent\DBToolsBundle\Helper\Compressor\Uncompressed'
     public: true

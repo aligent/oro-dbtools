@@ -1,11 +1,18 @@
 <?php
 namespace Aligent\DBToolsBundle\Command;
 
+use Aligent\DBToolsBundle\Database\MysqlConnection;
+use Aligent\DBToolsBundle\Helper\Compressor\Compressor;
+use Aligent\DBToolsBundle\Provider\CompressionServiceProvider;
+use Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider;
 use InvalidArgumentException;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
+
 /**
  * Import Command - Imports the database from a file
  *
@@ -16,12 +23,39 @@ use Symfony\Component\Console\Output\OutputInterface;
  * @license   https://opensource.org/licenses/mit MIT License
  * @link      http://www.aligent.com.au/
  **/
-class ImportCommand extends AbstractCommand
+class ImportCommand extends Command
 {
 
     const COMMAND_NAME = 'oro:db:import';
     const COMMAND_DESCRIPTION=  'opens mysql client by database config';
 
+    /**
+     * @var DatabaseConnectionProvider
+     */
+    protected $connectionProvider;
+
+    /**
+     * @var CompressionServiceProvider
+     */
+    protected $compressionProvider;
+
+    /**
+     * ConsoleCommand constructor.
+     * @param DatabaseConnectionProvider $connectionProvider
+     * @param CompressionServiceProvider $compressionProvider
+     */
+    public function __construct(
+        DatabaseConnectionProvider $connectionProvider,
+        CompressionServiceProvider $compressionProvider
+    ) {
+        $this->connectionProvider = $connectionProvider;
+        $this->compressionProvider = $compressionProvider;
+        parent::__construct();
+    }
+
+    /**
+     * Configures the name, arguments and options of the command
+     */
     protected function configure()
     {
         $this->setName(self::COMMAND_NAME)
@@ -34,16 +68,31 @@ class ImportCommand extends AbstractCommand
                 'optimize',
                 null,
                 InputOption::VALUE_NONE,
-                'Convert verbose INSERTs to short ones before import (not working with compression)'
+                'Convert verbose INSERTs to short ones before import (not working with compression or postgres)'
             );
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|void
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->writeSection($output, 'Import MySQL Database');
+        $output->writeln([
+            '',
+            $this->getHelper('formatter')->formatBlock('Import SQL Database', 'bg=blue;fg=white', true),
+            '',
+        ]);
 
-        $compressor = $this->getCompressor($input->getOption('compression'));
+        $connection = $this->connectionProvider->getConnection();
         $fileName = $this->checkFilename($input);
+
+        if ($input->getOption('compression')) {
+            $compressor = $this->compressionProvider->getCompressor($input->getOption('compression'));
+        } else {
+            $compressor = $this->compressionProvider->getCompressor('none');
+        }
 
         if ($input->getOption('optimize')) {
             if ($input->getOption('only-command')) {
@@ -52,14 +101,17 @@ class ImportCommand extends AbstractCommand
             if ($input->getOption('compression')) {
                 throw new InvalidArgumentException('Options --compression and --optimize are not compatible');
             }
+            if (!$connection instanceof MysqlConnection) {
+                throw new InvalidArgumentException('--optimize is currently supportord for mysql connections');
+            }
+
             $output->writeln('<comment>Optimizing <info>' . $fileName . '</info> to temporary file');
             $fileName = $this->optimize($fileName);
         }
 
-
         // create import command
         $command = $compressor->getDecompressingCommand(
-            $this->database->getMysqlConnectionString('mysql'),
+            $connection->getConnectionString(),
             $fileName
         );
 
@@ -67,27 +119,29 @@ class ImportCommand extends AbstractCommand
             $output->writeln($command);
             return;
         } else {
-            if ($input->getOption('only-if-empty') && count($this->database->getTables()) > 0 ) {
+            if ($input->getOption('only-if-empty') && count($connection->getTables()) > 0 ) {
                 $output->writeln('<comment>Skip import. Database is not empty</comment>');
                 return;
             }
         }
 
-//        if ($input->getOption('drop')) {
-//            $dbHelper->dropDatabase($output);
-//            $dbHelper->createDatabase($output);
-//        }
-//        if ($input->getOption('drop-tables')) {
-//            $dbHelper->dropTables($output);
-//        }
-
         $output->writeln(
             '<comment>Importing SQL dump <info>' . $fileName . '</info> to database <info>'
-            . $this->database->settings->getName() . '</info>'
+            . $connection->getName() . '</info>'
         );
 
-        $this->processCommand($command);
+        // need nulls to remove timeout
+        // @TODO: Default timeout to null but allow option to be passed through
+        $process = new Process(
+            $command,
+            null,
+            null,
+            null,
+            null
+        );
 
+        $process->mustRun();
+        
         $output->writeln('<info>Finished</info>');
 
         if ($input->getOption('optimize')) {
@@ -96,6 +150,7 @@ class ImportCommand extends AbstractCommand
     }
 
     /**
+     * @todo pull out to service or connection so we can support postgres
      * Optimize a dump by converting single INSERTs per line to INSERTs with multiple lines
      * @param $fileName
      * @return string temporary filename
