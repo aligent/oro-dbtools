@@ -1,6 +1,8 @@
 <?php
 namespace Aligent\DBToolsBundle\Command;
 
+use Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -14,32 +16,57 @@ use Symfony\Component\Console\Output\OutputInterface;
  * @license   https://opensource.org/licenses/mit MIT License
  * @link      http://www.aligent.com.au/
  **/
-class InfoCommand extends AbstractCommand
+class InfoCommand extends Command
 {
     const COMMAND_NAME = 'oro:db:info';
     const COMMAND_DESCRIPTION=  'Dumps the database connection details.';
 
+    /**
+     * @var DatabaseConnectionProvider
+     */
+    protected $connectionProvider;
+
+    /**
+     * ConsoleCommand constructor.
+     * @param DatabaseConnectionProvider $connectionProvider
+     */
+    public function __construct(
+        DatabaseConnectionProvider $connectionProvider
+    ) {
+        $this->connectionProvider = $connectionProvider;
+        parent::__construct();
+    }
+
+    /**
+     * Configures the name, arguments and options of the command
+     */
     protected function configure()
     {
         $this->setName(self::COMMAND_NAME)
             ->setDescription(self::COMMAND_DESCRIPTION);
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|void
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $data = array(
-            array('host', $this->database->settings->getHost()),
-            array('port', $this->database->settings->getPort()),
-            array('dbname', $this->database->settings->getName()),
-            array('username', $this->database->settings->getUser()),
-            array('password', $this->database->settings->getPassword()),
-            array('PDO-Connection-String', $this->database->getPdoConnectionString()),
-            array('JBDC-Connection-String', $this->database->getJbdcConnectionString()),
-            array('MySQL-Cli-String', $this->database->getMysqlConnectionString())
-        );
+        $connection = $this->connectionProvider->getConnection();
+        $data = [
+            ['host', $connection->getHost()],
+            ['port', $connection->getPort()],
+            ['dbname', $connection->getName()],
+            ['username', $connection->getUser()],
+            ['password', $connection->getPassword()],
+            ['PDO-Connection-String', $connection->getPdoConnectionString()],
+            ['JBDC-Connection-String', $connection->getJbdcConnectionString()],
+            ['cli-String', $connection->getConnectionString()]
+        ];
 
         $table = new Table($output);
-        $table->setHeaders(array('Name', 'Value'))
+        $table->setHeaders(['Name', 'Value'])
             ->setRows($data);
         $table->render();
     }

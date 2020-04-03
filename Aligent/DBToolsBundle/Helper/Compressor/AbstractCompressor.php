@@ -20,6 +20,7 @@ abstract class AbstractCompressor implements Compressor
     abstract public function getFileName($fileName, $pipe = true);
 
     /**
+     * @Todo replace with Symfony Process
      * Check whether pv is installed
      *
      * @return bool
@@ -30,5 +31,6 @@ abstract class AbstractCompressor implements Compressor
         $return = null;
         @exec('which pv', $out, $return);
 
-        return $return === 0;    }
+        return $return === 0;
+    }
 }
