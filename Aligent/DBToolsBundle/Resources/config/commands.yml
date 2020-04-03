@@ -13,9 +13,10 @@ services:
       - { name: console.command }
 
   Aligent\DBToolsBundle\Command\CreateCommand:
-    parent: Aligent\DBToolsBundle\Command\AbstractCommand
     class: Aligent\DBToolsBundle\Command\CreateCommand
     public: false
+    arguments:
+      - '@Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider'
     tags:
       - { name: console.command }
 
