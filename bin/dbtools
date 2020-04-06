@@ -6,7 +6,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\VarDumper\VarDumper;
 
 $packageAutoloader = __DIR__ . '/../vendor/autoload.php';
 if (file_exists($packageAutoloader)) {
