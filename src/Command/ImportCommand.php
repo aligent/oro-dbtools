@@ -2,7 +2,6 @@
 namespace Aligent\DBToolsBundle\Command;
 
 use Aligent\DBToolsBundle\Database\MysqlConnection;
-use Aligent\DBToolsBundle\Helper\Compressor\Compressor;
 use Aligent\DBToolsBundle\Provider\CompressionServiceProvider;
 use Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider;
 use InvalidArgumentException;
@@ -26,7 +25,7 @@ use Symfony\Component\Process\Process;
 class ImportCommand extends Command
 {
 
-    const COMMAND_NAME = 'oro:db:import';
+    const COMMAND_NAME = 'import';
     const COMMAND_DESCRIPTION=  'opens mysql client by database config';
 
     /**

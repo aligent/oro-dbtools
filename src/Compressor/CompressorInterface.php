@@ -5,14 +5,14 @@
  * @author Tom Klingenberg <https://github.com/ktomk>
  */
 
-namespace Aligent\DBToolsBundle\Helper\Compressor;
+namespace Aligent\DBToolsBundle\Compressor;
 
 /**
  * Interface Compressor
  *
  * @package N98\Magento\Command\Database\Compressor
  */
-interface Compressor
+interface CompressorInterface
 {
     /**
      * Returns the command line for compressing the dump file.

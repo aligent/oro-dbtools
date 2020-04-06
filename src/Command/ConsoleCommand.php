@@ -4,7 +4,6 @@ namespace Aligent\DBToolsBundle\Command;
 
 use Aligent\DBToolsBundle\Database\DatabaseConnectionInterface;
 use Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -23,7 +22,7 @@ use Symfony\Component\Process\Process;
  **/
 class ConsoleCommand extends Command
 {
-    const COMMAND_NAME = 'oro:db:console';
+    const COMMAND_NAME = 'console';
     const COMMAND_DESCRIPTION = 'Opens database client using the currently configured database connection.';
 
     /**
@@ -48,6 +47,11 @@ class ConsoleCommand extends Command
     protected function configure()
     {
         $this->setName(self::COMMAND_NAME)->setDescription(self::COMMAND_DESCRIPTION)
+              ->setAliases(
+                  [
+                      'con'
+                  ]
+              )
               ->addOption(
                   "only-command",
                   null,

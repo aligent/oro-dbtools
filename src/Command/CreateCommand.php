@@ -3,11 +3,12 @@ namespace Aligent\DBToolsBundle\Command;
 
 use Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputOption;
+
 /**
- * Info Command - Displays info on the database connection Oro is using.
+ * Create Command - Creates an empty database.
  *
  * @category  Aligent
  * @package   DBToolsBundle
@@ -16,10 +17,11 @@ use Symfony\Component\Console\Output\OutputInterface;
  * @license   https://opensource.org/licenses/mit MIT License
  * @link      http://www.aligent.com.au/
  **/
-class InfoCommand extends Command
+
+class CreateCommand extends Command
 {
-    const COMMAND_NAME = 'oro:db:info';
-    const COMMAND_DESCRIPTION=  'Dumps the database connection details.';
+    const COMMAND_NAME = 'create';
+    const COMMAND_DESCRIPTION=  'Creates an empty database.';
 
     /**
      * @var DatabaseConnectionProvider
@@ -40,10 +42,17 @@ class InfoCommand extends Command
     /**
      * Configures the name, arguments and options of the command
      */
-    protected function configure()
-    {
-        $this->setName(self::COMMAND_NAME)
-            ->setDescription(self::COMMAND_DESCRIPTION);
+    public function configure() {
+        $this
+            ->setName(self::COMMAND_NAME)
+            ->setDescription(self::COMMAND_DESCRIPTION)
+            ->addOption(
+                'only-command',
+                null,
+                InputOption::VALUE_NONE,
+                'Prints only the command. Does not Execute.'
+            )
+        ;
     }
 
     /**
@@ -51,23 +60,17 @@ class InfoCommand extends Command
      * @param OutputInterface $output
      * @return int|void
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
+    public function execute(InputInterface $input, OutputInterface $output) {
         $connection = $this->connectionProvider->getConnection();
-        $data = [
-            ['host', $connection->getHost()],
-            ['port', $connection->getPort()],
-            ['dbname', $connection->getName()],
-            ['username', $connection->getUser()],
-            ['password', $connection->getPassword()],
-            ['PDO-Connection-String', $connection->getPdoConnectionString()],
-            ['JBDC-Connection-String', $connection->getJbdcConnectionString()],
-            ['cli-String', $connection->getConnectionString()]
-        ];
 
-        $table = new Table($output);
-        $table->setHeaders(['Name', 'Value'])
-            ->setRows($data);
-        $table->render();
+        $outputOnly = (bool) $input->getOption('only-command');
+        $query = $connection->getCreateDatabaseQuery();
+        $output->writeln($query);
+
+        if (!$outputOnly) {
+            $pdo = $connection->getPDOConnection();
+            $pdo->query($query);
+            $output->writeln('<info>Created database</info> <comment>' . $connection->getName() . '</comment>');
+        }
     }
 }

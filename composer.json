@@ -2,10 +2,18 @@
     "name": "aligent/oro-dbtools",
     "description": "Database tools bundle for Oro Platform based projects.",
     "require": {
-        "oro/platform": ">=2.1",
-        "php": ">=7.2",
-        "ext-pdo": "*"
+        "php": ">=7.1",
+        "ext-pdo": "*",
+        "ifsnop/mysqldump-php": "v2.*",
+        "symfony/yaml": "^3.0 || ^4.0",
+        "symfony/filesystem": "^3.0 || ^4.0",
+        "symfony/console": "^3.0 || ^4.0",
+        "symfony/process": "^3.0 || ^4.0"
     },
+    "require-dev": {
+        "symfony/var-dumper": "^3.0 || ^4.0"
+    },
+    "prefer-stable": true,
     "license": "MIT",
     "authors": [
         {
@@ -14,8 +22,9 @@
         }
     ],
     "autoload": {
-        "psr-0": {
-            "Aligent\\DBToolsBundle": "."
+        "psr-4": {
+            "Aligent\\DBToolsBundle\\": "src"
         }
-    }
+    },
+    "bin": ["bin/dbtools"]
 }

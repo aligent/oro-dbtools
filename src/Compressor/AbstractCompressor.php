@@ -1,8 +1,8 @@
 <?php
 
-namespace Aligent\DBToolsBundle\Helper\Compressor;
+namespace Aligent\DBToolsBundle\Compressor;
 
-abstract class AbstractCompressor implements Compressor
+abstract class AbstractCompressor implements CompressorInterface
 {
     /**
      * @inheritdoc

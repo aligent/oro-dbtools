@@ -7,8 +7,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\VarDumper\VarDumper;
-
 
 /**
  * Drop Command - Drops the database or tables from the database.
@@ -23,7 +21,7 @@ use Symfony\Component\VarDumper\VarDumper;
 
 class DropCommand extends Command
 {
-    const COMMAND_NAME = 'oro:db:drop';
+    const COMMAND_NAME = 'drop';
     const COMMAND_DESCRIPTION=  'Drops the current Database';
     
     /**

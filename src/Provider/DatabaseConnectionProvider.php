@@ -30,7 +30,7 @@ class DatabaseConnectionProvider
      * @param string $password
      * @param string $host
      * @param string $port
-     *
+     * @param string $driver
      */
     public function __construct(
         string $name,
@@ -46,7 +46,7 @@ class DatabaseConnectionProvider
                 $this->connection = new MysqlConnection($name, $user, $password, $host, $port);
                 break;
             case PostgresConnection::DRIVER:
-                $this->connection = new MysqlConnection($name, $user, $password, $host, $port);
+                $this->connection = new PostgresConnection($name, $user, $password, $host, $port);
                 break;
             default:
                 throw new \InvalidArgumentException('Unsupported Database Connection Type.');

@@ -2,13 +2,10 @@
 namespace Aligent\DBToolsBundle\Command;
 
 use Aligent\DBToolsBundle\Database\DatabaseConnectionInterface;
-use Aligent\DBToolsBundle\Database\MysqlConnection;
-use Aligent\DBToolsBundle\Helper\Compressor\Compressor;
+use Aligent\DBToolsBundle\Compressor\CompressorInterface;
 use Aligent\DBToolsBundle\Helper\VerifyOrDie;
-
 use Aligent\DBToolsBundle\Provider\CompressionServiceProvider;
 use Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider;
-use InvalidArgumentException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
@@ -16,10 +13,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
-use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\Process\Process;
-use Symfony\Component\VarDumper\VarDumper;
-use Symfony\Component\Yaml\Yaml;
 
 /**
  * Dump Command - Dumps the database to a file
@@ -34,7 +28,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class DumpCommand extends Command
 {
-    const COMMAND_NAME = 'oro:db:dump';
+    const COMMAND_NAME = 'dump';
     const COMMAND_DESCRIPTION=  'Dumps the database';
 
     /**
@@ -48,7 +42,7 @@ class DumpCommand extends Command
     protected $connection;
 
     /**
-     * @var Compressor
+     * @var CompressorInterface
      */
     protected $compressor;
 

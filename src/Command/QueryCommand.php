@@ -24,7 +24,7 @@ use Symfony\Component\Process\Process;
 
 class QueryCommand extends Command
 {
-    const COMMAND_NAME = 'oro:db:query';
+    const COMMAND_NAME = 'query';
     const COMMAND_DESCRIPTION=  'Performs a query on the mysql database';
 
     /**

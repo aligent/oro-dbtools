@@ -1,6 +1,6 @@
 <?php
 
-namespace Aligent\DBToolsBundle\Helper\Compressor;
+namespace Aligent\DBToolsBundle\Compressor;
 
 class Gzip extends AbstractCompressor
 {

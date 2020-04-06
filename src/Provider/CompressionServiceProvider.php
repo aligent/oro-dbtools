@@ -13,7 +13,7 @@
 namespace Aligent\DBToolsBundle\Provider;
 
 
-use Aligent\DBToolsBundle\Helper\Compressor\Compressor;
+use Aligent\DBToolsBundle\Compressor\CompressorInterface;
 
 class CompressionServiceProvider
 {
@@ -21,9 +21,9 @@ class CompressionServiceProvider
 
     /**
      * @param $type
-     * @param Compressor $compressor
+     * @param CompressorInterface $compressor
      */
-    public function addCompressor($type, Compressor $compressor)
+    public function addCompressor($type, CompressorInterface $compressor)
     {
         if (isset($this->compressors[$type])) {
             throw new \InvalidArgumentException("Compressor of $type already exists.");
@@ -33,10 +33,9 @@ class CompressionServiceProvider
     }
 
     /**
-     * @todo pull out to service
      * @param string $type
-     * @return Compressor
-     * @throws InvalidArgumentException
+     * @return CompressorInterface
+     * @throws \InvalidArgumentException
      */
     public function getCompressor($type)
     {

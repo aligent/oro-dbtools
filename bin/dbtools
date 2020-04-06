@@ -1,0 +1,187 @@
+#!/usr/bin/env php
+<?php
+namespace Aligent\DBToolsBundle\Command;
+
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\VarDumper\VarDumper;
+
+$packageAutoloader = __DIR__ . '/../vendor/autoload.php';
+if (file_exists($packageAutoloader)) {
+    require_once $packageAutoloader;
+} else {
+    throw new \RuntimeException($packageAutoloader . ' Autoloader not detected.');
+}
+
+use Aligent\DBToolsBundle\Compressor\Gzip;
+use Aligent\DBToolsBundle\Compressor\Uncompressed;
+use Aligent\DBToolsBundle\Provider\CompressionServiceProvider;
+use Aligent\DBToolsBundle\Provider\DatabaseConnectionProvider;
+use \Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Yaml\Yaml;
+
+const CONFIG_FILE_NAME = 'db-tools-config.yml';
+
+// Create the console application
+$application = new Application('aligent-db-tools');
+
+// Manually define our own InputDefinition so we can use it with our own input handler
+// This way we can extract args before the application is run to use for our DB handler set up
+$definition = new InputDefinition();
+$definition->setArguments(
+    [
+        'command' => new InputArgument(
+            'command',
+            InputArgument::OPTIONAL,
+            '',
+            'list'
+        ),
+        'command_name' => new InputArgument(
+            'command_name',
+            InputArgument::OPTIONAL,
+            '',
+            'help'
+        )
+    ]
+);
+
+// Add in our global options which will be used to override any config file or environment variable values
+$options = [
+    new InputOption(
+        'database-name',
+        'name',
+        InputOption::VALUE_OPTIONAL,
+        'The database name to operate on.'
+    ),
+    new InputOption(
+        'database-user',
+        'user',
+        InputOption::VALUE_OPTIONAL,
+        'The database user to authenticate with.'
+    ),
+    new InputOption(
+        'database-password',
+        'password',
+        InputOption::VALUE_OPTIONAL,
+        'The database users password.'
+    ),
+    new InputOption(
+        'database-host',
+        'host',
+        InputOption::VALUE_OPTIONAL,
+        'The hostname of the database.'
+    ),
+    new InputOption(
+        'database-port',
+        'port',
+        InputOption::VALUE_OPTIONAL,
+        'The port used to connect with the database.'
+    ),
+    new InputOption(
+        'database-driver',
+        'driver',
+        InputOption::VALUE_OPTIONAL,
+        'The database driver that should be used.'
+    ),
+    new InputOption(
+        'config',
+        null,
+        InputOption::VALUE_OPTIONAL,
+        'The file that should be used to configure this utility.'
+    )
+];
+// Add to both our definition (so we can use with our own input) and the application definition (so it appears in the help)
+$definition->addOptions($options);
+$application->getDefinition()->addOptions($options);
+
+// Start configuring our application
+// @TODO: Add support for multiple named database connections
+$input = new ArgvInput(null, $definition);
+$output = new ConsoleOutput();
+$configFile = $input->getOption('config');
+$filesystem = new Filesystem();
+$configuration = [
+    'connection' => [
+        'database_name'     => null,
+        'database_user'     => null,
+        'database_password' => null,
+        'database_host'     => null,
+        'database_port'     => null,
+        'database_driver'   => null,
+    ],
+    'definitions' => []
+];
+
+
+// Pull in our included sanitization definitions
+$configuration['definitions'] = Yaml::parseFile(realpath(__DIR__ . '/../resources/definitions.yml'));
+
+// if the user hasn't specified a config file check application root (one directory up from where this script exists)
+// and if it exists there use it
+// else if the user has specified a file and it doesn't exist throw an error
+if (!$configFile && $filesystem->exists(getcwd() . '/' . CONFIG_FILE_NAME)) {
+    $configFile = getcwd() . '/' . CONFIG_FILE_NAME;
+} else if ($configFile && !$filesystem->exists($configFile)) {
+    $output->writeln("<error>$configFile does not exist.</error>");
+    exit();
+}
+
+// Merge in the config file
+if ($configFile) {
+    $configuration = array_replace_recursive($configuration, Yaml::parseFile($configFile));
+}
+
+// attempt to pull connection configuration from environment variables
+// these will override anything configured in the yaml file
+foreach ($configuration['connection'] as $configKey => $configValue) {
+    $env = getenv(strtoupper($configKey));
+    if ($env) {
+        $configuration['connection'][$configKey] = $env;
+    }
+}
+
+// Initialize our database connection provider with out configured values
+// Configuration from our passed options  will override anything from above
+$connectionProvider = new DatabaseConnectionProvider(
+    $input->getOption('database-name') ?? $configuration['connection']['database_name'],
+    $input->getOption('database-user') ?? $configuration['connection']['database_user'],
+    $input->getOption('database-password') ?? $configuration['connection']['database_password'],
+    $input->getOption('database-host') ?? $configuration['connection']['database_host'],
+    $input->getOption('database-port') ?? $configuration['connection']['database_port'],
+    $input->getOption('database-driver') ?? $configuration['connection']['database_driver']
+);
+
+// Add in our compression services
+// @TODO: Delegate Compression to mysql-dump library so we don't rely on platform binaries
+$compressionProvider = new CompressionServiceProvider();
+$compressionProvider->addCompressor(
+    'gz',
+    new Gzip()
+);
+$compressionProvider->addCompressor(
+    'gzip',
+    new Gzip()
+);
+$compressionProvider->addCompressor(
+    'none',
+    new Uncompressed()
+);
+
+// Finally Add in our commands with their dependencies
+$application->addCommands(
+    [
+        new ConsoleCommand($connectionProvider),
+        new CreateCommand($connectionProvider),
+        new DropCommand($connectionProvider),
+        new InfoCommand($connectionProvider),
+        new QueryCommand($connectionProvider),
+        new DumpCommand($connectionProvider, $compressionProvider, $configuration['definitions']),
+        new ImportCommand($connectionProvider, $compressionProvider)
+    ]
+);
+
+$application->run();
