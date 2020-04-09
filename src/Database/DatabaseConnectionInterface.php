@@ -12,6 +12,8 @@
 
 namespace Aligent\DBToolsBundle\Database;
 
+use Ifsnop\Mysqldump\Mysqldump;
+
 interface DatabaseConnectionInterface
 {
     /**
@@ -63,15 +65,6 @@ interface DatabaseConnectionInterface
     public function getTables(): array;
 
     /**
-     * Recursive function to
-     * @param array $list
-     * @param array $definitions
-     * @param array $resolved
-     * @return array
-     */
-    public function resolveTables(array $list, array $definitions = array(), array $resolved = array()): array;
-
-    /**
      * Returns the query used to create the database if it does not already exist
      * @return string
      */
@@ -89,4 +82,11 @@ interface DatabaseConnectionInterface
      */
     public function getDropTablesQuery(): string;
 
+    /**
+     * Returns a configured dumper object
+     * @param array $dumpSettings
+     * @throws \Exception
+     * @return Mysqldump
+     */
+    public function getDumper(array $dumpSettings): Mysqldump;
 }

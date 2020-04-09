@@ -13,9 +13,11 @@
 namespace Aligent\DBToolsBundle\Database;
 
 
+use Ifsnop\Mysqldump\Mysqldump;
+
 class PostgresConnection extends AbstractConnection
 {
-    const DRIVER = 'pdo_pgsql';
+    const DRIVER = 'pgsql';
 
     /**
      * Returns a CLI execution string to connect to the database
@@ -67,14 +69,6 @@ class PostgresConnection extends AbstractConnection
     /**
      * @inheritDoc
      */
-    public function resolveTables(array $list, array $definitions = [], array $resolved = []): array
-    {
-        throw new \RuntimeException('Postgres Support has not been implemented yet.');
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getCreateDatabaseQuery(): string
     {
         throw new \RuntimeException('Postgres Support has not been implemented yet.');
@@ -92,6 +86,14 @@ class PostgresConnection extends AbstractConnection
      * @inheritDoc
      */
     public function getDropTablesQuery(): string
+    {
+        throw new \RuntimeException('Postgres Support has not been implemented yet.');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getDumper(array $dumpSettings): Mysqldump
     {
         throw new \RuntimeException('Postgres Support has not been implemented yet.');
     }

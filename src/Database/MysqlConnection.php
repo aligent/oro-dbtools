@@ -13,14 +13,14 @@
 namespace Aligent\DBToolsBundle\Database;
 
 
+use Ifsnop\Mysqldump\Mysqldump;
 use PDO;
+use PDOStatement;
 use RuntimeException;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 
 class MysqlConnection extends AbstractConnection
 {
-    const DRIVER = 'pdo_mysql';
+    const DRIVER = 'mysql';
 
     /**
      * @var PDO
@@ -37,6 +37,44 @@ class MysqlConnection extends AbstractConnection
      * @var array
      */
     protected $resolvedTables;
+
+    /**
+     * Default settings to be used with the dump command
+     * @var array
+     */
+    protected $defaultDumpSettings = [
+        'include-tables' => [],
+        'exclude-tables' => [],
+        'compress' => Mysqldump::NONE,
+        'init_commands' => [],
+        'no-data' => [],
+        'reset-auto-increment' => false,
+        'add-drop-database' => false,
+        'add-drop-table' => false,
+        'add-drop-trigger' => true,
+        'add-locks' => true,
+        'complete-insert' => false,
+        'databases' => false,
+        'default-character-set' => Mysqldump::UTF8,
+        'disable-keys' => true,
+        'extended-insert' => true,
+        'events' => false,
+        'hex-blob' => true,
+        'insert-ignore' => false,
+        'net_buffer_length' => Mysqldump::MAXLINESIZE,
+        'no-autocommit' => true,
+        'no-create-info' => false,
+        'lock-tables' => true,
+        'routines' => false,
+        'single-transaction' => true,
+        'skip-triggers' => false,
+        'skip-tz-utc' => false,
+        'skip-comments' => false,
+        'skip-dump-date' => false,
+        'skip-definer' => false,
+        'where' => '',
+        'disable-foreign-keys-check' => true
+    ];
 
     /**
      * Returns a CLI execution string to connect to the database
@@ -172,64 +210,6 @@ class MysqlConnection extends AbstractConnection
     }
 
     /**
-     * @param array $list
-     * @param array $definitions
-     * @param array $resolved
-     * @return array
-     */
-    public function resolveTables(array $list, array $definitions = [], array $resolved = []): array {
-        if ($this->resolvedTables === null) {
-            $this->resolvedTables = $this->getTables(true);
-        }
-
-        $resolvedList = [];
-        foreach ($list as $entry) {
-            if (substr($entry, 0, 1) == '@') {
-                $code = substr($entry, 1);
-                if (!isset($definitions [$code])) {
-                    throw new RuntimeException('Table-groups could not be resolved: ' . $entry);
-                }
-                if (!isset($resolved[$code])) {
-                    $resolved[$code] = true;
-                    $tables = $this->resolveTables(
-                        explode(' ', $definitions[$code]['tables']),
-                        $definitions,
-                        $resolved
-                    );
-                    $resolvedList = array_merge($resolvedList, $tables);
-                }
-                continue;
-            }
-
-            // resolve wildcards
-            if (strpos($entry, '*') !== false) {
-                $connection = $this->getPDOConnection();
-                $sth = $connection->prepare(
-                    'SHOW TABLES LIKE :like',
-                    [PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY]
-                );
-                $sth->execute(
-                    [':like' => str_replace('*', '%', $entry)]
-                );
-                $rows = $sth->fetchAll();
-                foreach ($rows as $row) {
-                    $resolvedList[] = $row[0];
-                }
-                continue;
-            }
-
-            if (in_array($entry, $this->resolvedTables)) {
-                $resolvedList[] = $entry;
-            }
-        }
-
-        asort($resolvedList);
-        $resolvedList = array_unique($resolvedList);
-
-        return $resolvedList;
-    }
-
-    /**
      * @return string
      */
     public function getCreateDatabaseQuery(): string
@@ -299,6 +279,7 @@ class MysqlConnection extends AbstractConnection
      * @param PDOStatement $statement
      * @param string $message
      *
+     * @return string
      * @throws RuntimeException
      */
     protected function throwRuntimeException(PDOStatement $statement, $message = ""): string
@@ -313,5 +294,20 @@ class MysqlConnection extends AbstractConnection
         }
 
         throw new RuntimeException($message . $reason);
+    }
+
+    /**
+     * @inheritDoc
+     * @throws \Exception
+     */
+    public function getDumper(array $dumpSettings = []): Mysqldump
+    {
+        $dumpSettings = array_replace_recursive($this->defaultDumpSettings, $dumpSettings);
+        return new Mysqldump(
+            $this->getPdoConnectionString(),
+            $this->user,
+            $this->password,
+            $dumpSettings
+        );
     }
 }
