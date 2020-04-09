@@ -1,0 +1,291 @@
+oro_commerce:
+  truncate:
+    - oro_message_queue_state
+    - oro_message_queue_job_unique
+    - oro_message_queue_job
+    - oro_message_queue
+    - oro_cus_navigation_history
+    - oro_navigation_history
+    - oro_tracking_data
+    - oro_tracking_unique_visit
+    - oro_tracking_visit_event
+    - oro_search_index_text
+    - oro_search_index_integer
+    - oro_search_index_decimal
+    - oro_search_index_decimal
+    - oro_audit
+    - oro_tracking_event
+    - oro_tracking_event_dictionary
+    - oro_tracking_visit
+    - oro_tracking_website
+    - oro_search_item
+  update:
+    oro_address:
+      columns:
+        street: md5
+        city: md5
+        postal_code: md5
+        first_name: md5
+        last_name: md5
+    oro_business_unit:
+      columns:
+        email: email
+        name: md5
+        phone: md5
+    oro_comment:
+      columns:
+        message: md5
+    oro_customer:
+      columns:
+        name: md5
+    oro_customer_address:
+      columns:
+        street: md5
+        city: md5
+        postal_code: md5
+        first_name: md5
+        last_name: md5
+    oro_customer_user:
+      columns:
+        username: email
+        email: email
+        first_name: md5
+        last_name: md5
+        password: password
+    oro_customer_user_address:
+      columns:
+        street: md5
+        city: md5
+        postal_code: md5
+        first_name: md5
+        last_name: md5
+    oro_email:
+      columns:
+        subject: md5
+        from_name: md5
+    oro_email_origin:
+      columns:
+        imap_host: md5
+        imap_user: md5
+    oro_email_address:
+      columns:
+        email: email
+    oro_email_body:
+      columns:
+        body: md5
+        text_body: md5
+    oro_email_attachment_content:
+      columns:
+        content: attachment
+    oro_email_recipient:
+      columns:
+        name: md5
+    oro_integration_transport:
+      columns:
+        api_key: md5
+        api_user: md5
+        api_token: md5
+    oro_notification_mass_notif:
+      columns:
+        email: email
+        sender: md5
+    oro_notification_recip_list:
+      columns:
+        email: email
+        entity_emails: md5
+    oro_note:
+      columns:
+        message: md5
+    oro_order_address:
+      columns:
+        street: md5
+        city: md5
+        postal_code: md5
+        phone: md5
+    oro_order_shipping_tracking:
+      columns:
+        number: md5
+    oro_payment_transaction:
+      columns:
+        access_identifier: md5
+        access_token: md5
+    oro_pro_user_client_data:
+      columns:
+        ip_address: md5
+    oro_pro_user_password_history:
+      columns:
+        salt: password
+        password_hash: password
+    oro_quote_address:
+      columns:
+        street: md5
+        city: md5
+        postal_code: md5
+        phone: md5
+    oro_rfp_request:
+      columns:
+        first_name: md5
+        last_name: md5
+        email: email
+        phone: md5
+    oro_user:
+      columns:
+        username: email
+        first_name: md5
+        last_name: md5
+        email: email
+        phone: md5
+        birthday: datetime
+        salt: password
+        password: password
+    oro_user_impersonation:
+      columns:
+        token: md5
+        ip_address: md5
+    oro_user_email:
+      columns:
+        email: email
+    oro_user_api:
+      columns:
+        api_key: md5
+    orocrm_call:
+      columns:
+        phone_number: md5
+    orocrm_campaign_email:
+      columns:
+        transport: md5
+        sender_email: md5
+        name: md5
+    orocrm_contact:
+      columns:
+        email: email
+        first_name: md5
+        last_name: md5
+        birthday: datetime
+        fax: md5
+        skype: md5
+        twitter: md5
+        facebook: md5
+        linkedin: md5
+    orocrm_contact_address:
+      columns:
+        street: md5
+        city: md5
+        postal_code: md5
+        first_name: md5
+        last_name: md5
+    orocrm_contactus_request:
+      columns:
+        email_address: email
+        first_name: md5
+        last_name: md5
+        phone: md5
+    orocrm_contact_phone:
+      columns:
+        phone: md5
+    orocrm_contact_email:
+      columns:
+        email: email
+    orocrm_dm_contact:
+      columns:
+        email: email
+        first_name: md5
+        last_name: md5
+        postcode: md5
+    orocrm_magento_cart:
+      columns:
+        email: email
+        first_name: md5
+        last_name: md5
+    orocrm_magento_cart_address:
+      columns:
+        phone: md5
+        street: md5
+        city: md5
+        postal_code: md5
+        first_name: md5
+        last_name: md5
+    orocrm_magento_customer:
+      columns:
+        email: email
+        first_name: md5
+        last_name: md5
+        birthday: datetime
+        password: password
+    orocrm_magento_customer_addr:
+      columns:
+        phone: md5
+        street: md5
+        city: md5
+        postal_code: md5
+        first_name: md5
+        last_name: md5
+    orocrm_magento_newsl_subscr:
+      columns:
+        email: email
+    orocrm_magento_order:
+      columns:
+        customer_email: email
+        remote_ip: md5
+        first_name: md5
+        last_name: md5
+    orocrm_magento_order_address:
+      columns:
+        first_name: md5
+        last_name: md5
+        phone: md5
+        fax: md5
+        street: md5
+        city: md5
+        postal_code: md5
+    orocrm_mailchimp_campaign:
+      columns:
+        from_email: email
+        from_name: md5
+    orocrm_mailchimp_member:
+      columns:
+        email: email
+        phone: md5
+        first_name: md5
+        last_name: md5
+        confirmed_ip: md5
+    orocrm_mailchimp_ml_email:
+      columns:
+        email: email
+    orocrm_mc_mmbr_activity:
+      columns:
+        email: email
+        ip_address: md5
+    orocrm_mc_subscribers_list:
+      columns:
+        default_from_name: md5
+        default_from_email: md5
+    orocrm_sales_b2bcustomer_email:
+      columns:
+        email: email
+    orocrm_sales_b2bcustomer_phone:
+      columns:
+        phone: md5
+    orocrm_sales_lead:
+      columns:
+        name: md5
+        first_name: md5
+        last_name: md5
+        twitter: md5
+        linkedin: md5
+    orocrm_sales_lead_address:
+      columns:
+        street: md5
+        city: md5
+        postal_code: md5
+        first_name: md5
+        last_name: md5
+    orocrm_sales_lead_email:
+      columns:
+        email: email
+    orocrm_sales_lead_phone:
+      columns:
+        phone: md5
+    orocrm_zd_user:
+      columns:
+        email: email

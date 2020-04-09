@@ -1,0 +1,16 @@
+#!/usr/bin/env php
+<?php
+namespace Aligent\DBToolsBundle\Command;
+
+$packageAutoloader = __DIR__ . '/../vendor/autoload.php';
+if (file_exists($packageAutoloader)) {
+    require_once $packageAutoloader;
+} else {
+    throw new \RuntimeException($packageAutoloader . ' Autoloader not detected.');
+}
+
+use Aligent\DBToolsBundle\Application;
+
+// Create the console application
+$application = new Application('aligent-db-tools');
+$application->run();
